@@ -1,26 +1,29 @@
-name: CI
+name: Build and Publish Docker Image
 
 on:
   push:
     branches:
-      - main  # Adjust the branch name as needed
+      - main  # Replace with your main branch name
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use an Ubuntu runner (or your preferred OS)
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Build and test Docker image
-        run: |
-          docker build -t my-flask-app .
-          docker run my-flask-app python -m pytest  # Replace with your testing command
+      - name: Login to Docker Hub
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image to registry
-        run: |
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker tag my-flask-app ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
+      - name: Build Docker Image
+        run: docker build -t aspdiscovery/apppp:latest .
+        # Replace 'your-dockerhub-username' and 'your-image-name' with your Docker Hub username and image name
+
+      - name: Push Docker Image to Docker Hub
+        run: docker push aspdiscovery/apppp:latest
+        # Replace 'your-dockerhub-username' and 'your-image-name' with your Docker Hub username and image name
 
